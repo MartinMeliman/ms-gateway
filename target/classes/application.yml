@@ -1,0 +1,118 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-gateway
+  cloud:
+    gateway:
+      # Descubrimiento automático de rutas via Eureka
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      # ── RUTAS EXPLÍCITAS hacia cada microservicio ──
+      # uri: lb://NOMBRE  → lb significa Load Balanced (Eureka resuelve la IP/puerto)
+      routes:
+        - id: ms-usuarios
+          uri: lb://ms-usuarios
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-autenticacion
+          uri: lb://ms-autenticacion
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-productos
+          uri: lb://ms-productos
+          predicates:
+            - Path=/api/productos/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-categorias
+          uri: lb://ms-categorias
+          predicates:
+            - Path=/api/categorias/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-pedidos
+          uri: lb://ms-pedidos
+          predicates:
+            - Path=/api/pedidos/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-carrito
+          uri: lb://ms-carrito
+          predicates:
+            - Path=/api/carrito/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-pagos
+          uri: lb://ms-pagos
+          predicates:
+            - Path=/api/pagos/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-envios
+          uri: lb://ms-envios
+          predicates:
+            - Path=/api/envios/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-resenas
+          uri: lb://ms-resenas
+          predicates:
+            - Path=/api/resenas/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+        - id: ms-notificaciones
+          uri: lb://ms-notificaciones
+          predicates:
+            - Path=/api/notificaciones/**
+          filters:
+            - AddRequestHeader=X-Gateway, ms-gateway
+
+# Conexión al servidor Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+# ═══════════════════════════════════════════════════════
+# PERFILES: dev (local) y prod (Render)
+# Se activan con: spring.profiles.active=dev  o  =prod
+# ═══════════════════════════════════════════════════════
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+eureka:
+  client:
+    service-url:
+      # En Render, EUREKA_URL se define como variable de entorno
+      defaultZone: ${EUREKA_URL}
